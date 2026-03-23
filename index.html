@@ -152,6 +152,25 @@
 const API_URL = "/api/chat";
 
 // ── State ──────────────────────────────────────────────────────────────────
+// ── Session history (prevents same lesson repeating within a day) ──────────
+function getTodayHistory() {
+  try {
+    const today = new Date().toDateString();
+    const raw = localStorage.getItem('de_today_history');
+    const data = raw ? JSON.parse(raw) : {};
+    if (data.date !== today) return { date: today, themes: [], grammar: [] };
+    return data;
+  } catch { return { date: new Date().toDateString(), themes: [], grammar: [] }; }
+}
+function addToHistory(theme, grammarTitle) {
+  try {
+    const h = getTodayHistory();
+    if (theme && !h.themes.includes(theme)) h.themes.push(theme);
+    if (grammarTitle && !h.grammar.includes(grammarTitle)) h.grammar.push(grammarTitle);
+    localStorage.setItem('de_today_history', JSON.stringify(h));
+  } catch {}
+}
+
 function getState() {
   try { const s = localStorage.getItem('de_lesson_state'); return s ? JSON.parse(s) : { streak:0, lastDate:null, dayCount:0 }; }
   catch { return { streak:0, lastDate:null, dayCount:0 }; }
@@ -243,6 +262,9 @@ function buildPrompt(topic, difficulty) {
   return `You are a German language tutor. Generate a structured 25-minute daily lesson for an adult learner targeting ${difficulty} proficiency.
 ${LEARNER_PROFILE}
 Topic focus: ${topicMap[topic] || topicMap.auto}
+
+ALREADY USED TODAY — DO NOT REPEAT these grammar points or themes:
+${(() => { const h = getTodayHistory(); const parts = []; if (h.grammar.length) parts.push('Grammar points used: ' + h.grammar.join(', ')); if (h.themes.length) parts.push('Themes used: ' + h.themes.join(', ')); return parts.length ? parts.join('. ') + '. Choose something clearly different.' : 'Nothing used yet — choose freely.'; })()} 
 ${EXERCISE_TYPES}
 
 Return ONLY valid JSON (no markdown, no preamble):
@@ -569,6 +591,7 @@ async function generateLesson() {
   document.getElementById('lessonOutput').innerHTML = `<div class="loading"><div class="spinner"></div>Generating your lesson…</div>`;
   try {
     const lesson = await callAPI(buildPrompt(topic, difficulty));
+    addToHistory(lesson.theme, lesson.grammar?.title);
     renderLesson(lesson, false);
   } catch(e) {
     document.getElementById('lessonOutput').innerHTML = `<div class="error">Failed: ${e.message}</div>`;
