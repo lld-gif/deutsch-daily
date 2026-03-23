@@ -18,17 +18,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 }
-```
-
-Commit → Vercel redeploys → app works.
-
----
-
-**The ELI5 of what this actually does:**
-```
-BEFORE (broken):
-Browser → Anthropic API ✗ (CORS blocked — Anthropic says "who are you?")
-
-AFTER (working):
-Browser → /api/chat (your own Vercel server) → Anthropic API ✓
-         (same origin, CORS fine)    (server-to-server, no CORS)
