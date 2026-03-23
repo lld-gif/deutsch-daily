@@ -6,29 +6,17 @@
 <title>🇩🇪 Deutsch – Daily Lesson</title>
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #222638;
-    --border: #2e3248;
-    --accent: #4f7ef8;
-    --accent2: #f5a623;
-    --green: #3ecf8e;
-    --red: #f87171;
-    --purple: #a78bfa;
-    --text: #e2e8f0;
-    --muted: #8892a4;
-    --kita: #a78bfa;
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #222638; --border: #2e3248;
+    --accent: #4f7ef8; --accent2: #f5a623; --green: #3ecf8e; --red: #f87171;
+    --purple: #a78bfa; --text: #e2e8f0; --muted: #8892a4; --kita: #a78bfa;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; padding: 24px 16px; }
-
-  .header { text-align: center; margin-bottom: 28px; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; padding: 24px 16px; max-width: 680px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 24px; }
   .header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
   .header .meta { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
-
-  .progress-bar { background: var(--surface2); border-radius: 8px; height: 6px; margin-bottom: 24px; overflow: hidden; }
+  .progress-bar { background: var(--surface2); border-radius: 8px; height: 6px; margin-bottom: 20px; overflow: hidden; }
   .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--kita)); border-radius: 8px; transition: width 0.5s ease; }
-
   .controls { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
   select, button { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; cursor: pointer; }
   select:focus, button:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -37,38 +25,51 @@
   button.review-btn { background: rgba(167,139,250,0.15); border-color: var(--purple); color: var(--purple); font-weight: 600; }
   button:disabled { opacity: 0.4; cursor: default; }
   .spacer { flex: 1; }
-
   .review-banner { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.4); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--purple); }
-
   .lesson-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
   .section-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-
   .grammar-block { border-left: 3px solid var(--accent); padding-left: 14px; margin-bottom: 6px; }
   .grammar-title { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
   .grammar-body { font-size: 0.9rem; line-height: 1.6; color: var(--text); }
   .grammar-body .formula { background: var(--surface2); border-radius: 6px; padding: 8px 12px; margin: 8px 0; font-family: monospace; font-size: 0.85rem; color: var(--accent2); }
   .grammar-body em { color: var(--accent2); font-style: normal; font-weight: 600; }
-
   .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   @media(max-width: 480px) { .vocab-grid { grid-template-columns: 1fr; } }
   .vocab-item { background: var(--surface2); border-radius: 10px; padding: 10px 14px; border: 1px solid var(--border); position: relative; }
   .vocab-item.kita { border-color: var(--kita); }
-  .vocab-item .kita-badge { position: absolute; top: 8px; right: 10px; font-size: 0.65rem; color: var(--kita); font-weight: 700; letter-spacing: 0.5px; }
+  .vocab-item .kita-badge { position: absolute; top: 8px; right: 10px; font-size: 0.65rem; color: var(--kita); font-weight: 700; }
   .vocab-de { font-weight: 700; font-size: 0.95rem; }
   .vocab-en { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
   .vocab-note { font-size: 0.75rem; color: var(--accent2); margin-top: 3px; }
-
   .sentences-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
   .sentence-item { background: var(--surface2); border-radius: 10px; padding: 12px 14px; }
   .sentence-item.error-spot { border: 1px solid rgba(248,113,113,0.4); }
   .sentence-de { font-weight: 600; font-size: 0.95rem; margin-bottom: 3px; }
   .sentence-en { font-size: 0.8rem; color: var(--muted); }
 
-  .exercise-block { }
+  /* Exercise section */
+  .exercise-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .exercise-counter { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+  .exercise-dots { display: flex; gap: 5px; }
+  .exercise-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+  .exercise-dot.done-correct { background: var(--green); }
+  .exercise-dot.done-wrong { background: var(--red); }
+  .exercise-dot.active { background: var(--accent); }
+
+  .exercise-block { min-height: 180px; }
+  .exercise-type-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; margin-bottom: 10px; }
+  .badge-mc { background: rgba(79,126,248,0.15); color: var(--accent); border: 1px solid rgba(79,126,248,0.3); }
+  .badge-fill { background: rgba(245,166,35,0.15); color: var(--accent2); border: 1px solid rgba(245,166,35,0.3); }
+  .badge-error { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+  .badge-translate { background: rgba(62,207,142,0.15); color: var(--green); border: 1px solid rgba(62,207,142,0.3); }
+
   .exercise-prompt { font-size: 0.95rem; margin-bottom: 14px; line-height: 1.5; }
-  .exercise-items { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .exercise-prompt strong { color: var(--text); }
+
+  /* Multiple choice */
+  .exercise-items { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
   .exercise-item { display: flex; align-items: center; gap: 10px; background: var(--surface2); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--border); cursor: pointer; transition: border-color 0.15s; }
-  .exercise-item:hover { border-color: var(--accent); }
+  .exercise-item:hover:not(.correct):not(.wrong):not(.revealed) { border-color: var(--accent); }
   .exercise-item.correct { border-color: var(--green); background: rgba(62,207,142,0.08); }
   .exercise-item.wrong { border-color: var(--red); background: rgba(248,113,113,0.08); }
   .exercise-item.revealed { border-color: var(--green); background: rgba(62,207,142,0.08); }
@@ -76,14 +77,31 @@
   .exercise-item.correct .option-letter { background: var(--green); color: #0f1117; }
   .exercise-item.wrong .option-letter { background: var(--red); color: #0f1117; }
   .exercise-item.revealed .option-letter { background: var(--green); color: #0f1117; }
-  .feedback { font-size: 0.85rem; padding: 10px 14px; border-radius: 8px; margin-top: 4px; }
+
+  /* Fill-in / Translate */
+  .text-input-wrap { display: flex; gap: 8px; margin-bottom: 12px; }
+  .text-input-wrap input { flex: 1; background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; outline: none; }
+  .text-input-wrap input:focus { border-color: var(--accent); }
+  .text-input-wrap input.correct { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .text-input-wrap input.wrong { border-color: var(--red); background: rgba(248,113,113,0.06); }
+  .text-input-wrap button { padding: 10px 18px; font-weight: 600; }
+
+  .feedback { font-size: 0.85rem; padding: 10px 14px; border-radius: 8px; margin-bottom: 10px; }
   .feedback.correct { background: rgba(62,207,142,0.1); color: var(--green); border: 1px solid rgba(62,207,142,0.3); }
   .feedback.wrong { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+  .next-btn { width: 100%; padding: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 0.85rem; cursor: pointer; margin-top: 4px; }
+  .next-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  /* Score summary */
+  .score-card { text-align: center; padding: 32px 24px; }
+  .score-big { font-size: 3rem; font-weight: 800; margin-bottom: 4px; }
+  .score-label { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+  .score-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+  .score-dot { width: 12px; height: 12px; border-radius: 50%; }
 
   .loading { text-align: center; padding: 48px 24px; color: var(--muted); }
   .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .error { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); border-radius: 10px; padding: 16px; color: var(--red); font-size: 0.9rem; margin-bottom: 16px; }
   .streak { display: inline-flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 0.8rem; color: var(--accent2); font-weight: 600; }
   .tag { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 20px; margin-right: 6px; }
@@ -133,15 +151,13 @@
 <script>
 const API_URL = "/api/chat";
 
+// ── State ──────────────────────────────────────────────────────────────────
 function getState() {
-  try {
-    const s = localStorage.getItem('de_lesson_state');
-    return s ? JSON.parse(s) : { streak: 0, lastDate: null, dayCount: 0 };
-  } catch { return { streak: 0, lastDate: null, dayCount: 0 }; }
+  try { const s = localStorage.getItem('de_lesson_state'); return s ? JSON.parse(s) : { streak:0, lastDate:null, dayCount:0 }; }
+  catch { return { streak:0, lastDate:null, dayCount:0 }; }
 }
-function saveState(s) {
-  try { localStorage.setItem('de_lesson_state', JSON.stringify(s)); } catch {}
-}
+function saveState(s) { try { localStorage.setItem('de_lesson_state', JSON.stringify(s)); } catch {} }
+
 function updateStreakUI() {
   const today = new Date().toDateString();
   const s = getState();
@@ -156,150 +172,30 @@ function updateStreakUI() {
   const day = s.dayCount || 1;
   document.getElementById('progressFill').style.width = Math.min((day / 285) * 100, 100) + '%';
   document.getElementById('progressLabel').textContent = `Day ${day} of 285`;
-  // Auto-trigger review banner on day 7, 14, 21...
-  if (day > 1 && day % 7 === 0) {
-    showReviewBanner(day);
-  }
+  if (day > 1 && day % 7 === 0) showReviewBanner(day);
 }
 
 function showReviewBanner(day) {
+  if (document.getElementById('reviewBanner')) return;
   const week = Math.floor(day / 7);
-  const existing = document.getElementById('reviewBanner');
-  if (existing) return;
-  const banner = document.createElement('div');
-  banner.id = 'reviewBanner';
-  banner.className = 'review-banner';
-  banner.innerHTML = `<span style="font-size:1.2rem;">📋</span><div><strong>Week ${week} complete!</strong> Today is a review day — tap "Weekly Review" to check your gaps instead of a new lesson.</div>`;
-  document.querySelector('.controls').insertAdjacentElement('afterend', banner);
+  const b = document.createElement('div');
+  b.id = 'reviewBanner'; b.className = 'review-banner';
+  b.innerHTML = `<span style="font-size:1.2rem">📋</span><div><strong>Week ${week} complete!</strong> Today is a review day — tap "Weekly Review".</div>`;
+  document.querySelector('.controls').insertAdjacentElement('afterend', b);
 }
 
 function setDateLine() {
-  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
   document.getElementById('dateLine').textContent = new Date().toLocaleDateString('en-US', opts);
 }
 
-function buildReviewPrompt(difficulty) {
-  return `You are a German language tutor. Generate a 15-minute WEEKLY REVIEW session for an adult learner at ${difficulty} level targeting B1 to B2 by end of year.
-
-LEARNER PROFILE:
-- Son named Walter attends Kita (German preschool)
-- Documented gaps: Konjunktiv II (writes "wurde" instead of "wuerde"), seit + Praesens (defaults to English perfect), chained dass-clauses (verb-final breaks down in linked clauses), two-way prepositions and case switch, fixed verb+preposition pairs (sich erinnern an etc.), 3rd person singular conjugation (er putze instead of er putzt), noun capitalisation
-
-This is a weekly review checkpoint - test across ALL priority gaps, not just one.
-
-Return ONLY valid JSON (no markdown, no preamble):
-{
-  "level": "${difficulty}",
-  "theme": "Weekly Review - Gap Check",
-  "grammar": {
-    "title": "Weekly Review",
-    "explanation": "Quick recap of your three biggest gaps before the exercises. No new material today - just consolidation.",
-    "formula": "wuerde/haette/waere | seit + Praesens | Akk (wohin?) vs Dat (wo?)",
-    "tip": "The single most common error: writing wurde when you mean wuerde. One dot changes past fact to hypothetical."
-  },
-  "vocab": [
-    { "de": "German word/phrase", "en": "English", "note": "usage or gender reminder", "kita": false }
-  ],
-  "sentences": [
-    { "de": "A sentence with a deliberate grammar error for the learner to spot and correct", "en": "What this should mean - spot and fix the error" },
-    { "de": "Correct sentence using seit + Praesens involving Walter", "en": "English translation" },
-    { "de": "Correct Konjunktiv II sentence in a daily-life context", "en": "English translation" }
-  ],
-  "exercise": {
-    "type": "multiple_choice",
-    "prompt": "Which sentence is grammatically correct? Three contain errors from your documented gaps.",
-    "question": "Identify the correct German sentence:",
-    "options": ["option A", "option B", "option C", "option D"],
-    "answer": 0,
-    "explanation": "Explain why the other three are wrong, naming the specific error type from the learner profile"
-  }
-}
-
-Rules:
-- vocab: exactly 5 items mixing review words from gap areas, 1-2 kita true
-- sentences index 0 must contain a deliberate error (wrong tense, wrong case, or dropped preposition)
-- exercise wrong options must mirror actual learner errors: wurde/wuerde confusion, dropped prepositions, wrong case after two-way prepositions, er putze instead of er putzt
-- Keep it punchy - this is a checkpoint not a new lesson`;
-}
-
-function buildPrompt(topic, difficulty) {
-  const topicMap = {
-    auto: 'choose a topic that mixes practical daily life with useful grammar',
-    family_kita: 'Kita preschool routines, child-parent communication, school vocabulary a parent needs',
-    daily_life: 'everyday household, routines, errands, food and cooking',
-    grammar_focus: 'a key grammar structure at this level - choose something high-value',
-    emotions: 'expressing feelings, opinions, agreement and disagreement, small talk',
-    professional: 'workplace communication, meetings, emails, colleagues',
-    nature_outdoors: 'outdoor activities, seasons, weather, describing environment'
-  };
-  const topicDesc = topicMap[topic] || topicMap.auto;
-
-  return `You are a German language tutor. Generate a structured 15-minute daily lesson for an adult learner targeting ${difficulty} proficiency by end of year.
-
-LEARNER PROFILE (from diagnostic test):
-- Son named Walter attends Kita (German preschool).
-- Current level: A2/B1 border. Strong passive comprehension, good subordinate clause instinct.
-- 20% of vocabulary must be Kita/family-relevant (preschool routines, child-parent communication, emotions, animals, food, body parts, playground language).
-
-PRIORITY GRAMMAR ARC - address these in order, cycling back regularly:
-1. Konjunktiv II (HIGHEST PRIORITY): learner writes "wurde" instead of "wuerde". Drill wuerde/haette/waere forms.
-2. Seit + Praesens for ongoing actions: learner defaults to English-style perfect. Internalise "Er geht seit drei Monaten in die Kita."
-3. Chained subordinate clauses (dass/weil/obwohl): verb-final breaks in linked clauses. Drill: "Ich habe gehoert, dass X ist und dass Y."
-4. Two-way prepositions + case switch (Akkusativ motion vs Dativ location).
-5. Fixed verb + preposition pairs (sich erinnern an, warten auf, sich freuen auf/ueber etc.)
-6. 3rd person singular verb conjugation (er putzt not er putze).
-7. Noun capitalisation and gender.
-
-KNOWN STRENGTHS - use as scaffolding, don't over-drill:
-- Subordinate clause word order (obwohl, dass, weil)
-- Kita/preschool vocabulary
-- Perfekt tense formation (haben/sein + Partizip II)
-
-Topic focus: ${topicDesc}
-
-Return ONLY valid JSON with this exact structure (no markdown, no preamble):
-{
-  "level": "${difficulty}",
-  "theme": "short theme title in English",
-  "grammar": {
-    "title": "grammar point name",
-    "explanation": "2-3 sentence explanation, clear and concise",
-    "formula": "pattern formula or key rule as a short string",
-    "tip": "one practical tip referencing a specific error from the learner profile"
-  },
-  "vocab": [
-    { "de": "German word/phrase", "en": "English translation", "note": "gender/usage hint or null", "kita": true }
-  ],
-  "sentences": [
-    { "de": "German sentence", "en": "English translation" }
-  ],
-  "exercise": {
-    "type": "multiple_choice",
-    "prompt": "exercise instruction in English",
-    "question": "German sentence with ___ for the gap",
-    "options": ["option A", "option B", "option C", "option D"],
-    "answer": 0,
-    "explanation": "why this answer is correct, referencing the grammar point"
-  }
-}
-
-Rules:
-- Grammar point must target one of the priority gaps above (rotate, don't repeat consecutively)
-- vocab: exactly 5 items, mark kita true for 1-2 Kita-relevant words
-- sentences: exactly 3, demonstrating the grammar point; at least 1 usable with Walter
-- exercise: 4 options, answer is index 0-3; wrong options reflect learner's known error patterns
-- Keep everything practical and immediately usable in daily life or at Kita pickup`;
-}
-
+// ── API ────────────────────────────────────────────────────────────────────
 async function callAPI(prompt) {
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }]
-    })
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2500,
+      messages: [{ role: 'user', content: prompt }] })
   });
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const data = await res.json();
@@ -307,65 +203,163 @@ async function callAPI(prompt) {
   return JSON.parse(raw.replace(/```json|```/g, '').trim());
 }
 
-async function generateLesson() {
-  const btn = document.getElementById('generateBtn');
-  const topic = document.getElementById('topicSeed').value;
-  const difficulty = document.getElementById('difficultySelect').value;
-  btn.disabled = true;
-  const out = document.getElementById('lessonOutput');
-  out.innerHTML = `<div class="loading"><div class="spinner"></div>Generating your lesson…</div>`;
-  try {
-    const lesson = await callAPI(buildPrompt(topic, difficulty));
-    renderLesson(lesson, false);
-  } catch (e) {
-    out.innerHTML = `<div class="error">Failed to generate lesson: ${e.message}</div>`;
-  } finally {
-    btn.disabled = false;
-  }
+// ── Prompts ────────────────────────────────────────────────────────────────
+const LEARNER_PROFILE = `
+LEARNER PROFILE (from diagnostic):
+- Son named Walter attends Kita (German preschool). ~20% vocab must be Kita-relevant.
+- Level: A2/B1 border. Good subordinate clause instinct, strong Kita vocab.
+- PRIORITY GAPS (address these, rotate through):
+  1. Konjunktiv II — writes "wurde" instead of "wuerde". Drill wuerde/haette/waere.
+  2. Seit + Praesens — defaults to English perfect. Drill "Er geht seit X Monaten in die Kita."
+  3. Chained dass-clauses — verb-final breaks in linked clauses.
+  4. Two-way prepositions + case switch (Akk motion vs Dat location).
+  5. Fixed verb+preposition pairs (sich erinnern an, warten auf, etc.)
+  6. 3rd person conjugation (er putzt not er putze).
+  7. Noun capitalisation and gender.
+- STRENGTHS (scaffold on, don't re-drill): subordinate clause word order, Kita vocab, Perfekt tense.`;
+
+const EXERCISE_TYPES = `
+Exercise types to use across the 10 exercises (mix all four):
+- "multiple_choice": question with ___ gap, 4 options A-D, answer is index 0-3.
+- "fill_in": sentence with ___ gap, correct_answer is exact string expected (accept minor typos).
+- "error_spot": a German sentence with one deliberate error, correct_sentence is the fixed version, explanation says what was wrong.
+- "translate": an English sentence to translate to German, correct_answer is the target German sentence.
+
+For exercises 1-7: target today's grammar point primarily.
+For exercises 8-10: cross-test previous gaps from the priority list above (rotate so no two lessons test the same gap in slot 8-10).
+Wrong options for multiple_choice must mirror the learner's documented error patterns (e.g. wurde vs wuerde).`;
+
+function buildPrompt(topic, difficulty) {
+  const topicMap = {
+    auto: 'choose a practical daily-life topic that pairs well with the grammar point',
+    family_kita: 'Kita routines, child-parent communication, preschool vocabulary',
+    daily_life: 'household, routines, errands, food and cooking',
+    grammar_focus: 'choose a high-value grammar structure for this level',
+    emotions: 'expressing feelings, opinions, agreement/disagreement, small talk',
+    professional: 'workplace communication, meetings, emails',
+    nature_outdoors: 'outdoor activities, seasons, weather'
+  };
+  return `You are a German language tutor. Generate a structured 25-minute daily lesson for an adult learner targeting ${difficulty} proficiency.
+${LEARNER_PROFILE}
+Topic focus: ${topicMap[topic] || topicMap.auto}
+${EXERCISE_TYPES}
+
+Return ONLY valid JSON (no markdown, no preamble):
+{
+  "level": "${difficulty}",
+  "theme": "short theme title in English",
+  "grammar": {
+    "title": "grammar point name",
+    "explanation": "2-3 sentence explanation",
+    "formula": "key pattern as short string",
+    "tip": "one practical tip referencing a learner error"
+  },
+  "vocab": [
+    { "de": "word", "en": "translation", "note": "gender/usage or null", "kita": true }
+  ],
+  "sentences": [
+    { "de": "German sentence", "en": "English translation" }
+  ],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "prompt": "instruction",
+      "question": "sentence with ___",
+      "options": ["A","B","C","D"],
+      "answer": 0,
+      "explanation": "why correct, name the error pattern avoided"
+    }
+  ]
+}
+Rules:
+- vocab: exactly 5 items, 1-2 kita:true
+- sentences: exactly 3, at least 1 usable with Walter
+- exercises: exactly 10 items mixing all 4 types. First 7 target today's grammar. Last 3 cross-test previous gaps.
+- fill_in and error_spot and translate exercises use: { "type":"fill_in"|"error_spot"|"translate", "prompt":"...", "question":"...", "correct_answer":"...", "explanation":"..." }
+- error_spot also includes "correct_sentence" field
+- Wrong MC options must reflect learner's known errors`;
 }
 
-async function generateReview() {
-  const difficulty = document.getElementById('difficultySelect').value;
-  const btn = document.getElementById('generateBtn');
-  btn.disabled = true;
-  const out = document.getElementById('lessonOutput');
-  out.innerHTML = `<div class="loading"><div class="spinner"></div>Building your weekly review…</div>`;
-  try {
-    const lesson = await callAPI(buildReviewPrompt(difficulty));
-    renderLesson(lesson, true);
-  } catch (e) {
-    out.innerHTML = `<div class="error">Failed to generate review: ${e.message}</div>`;
-  } finally {
-    btn.disabled = false;
-  }
+function buildReviewPrompt(difficulty) {
+  return `You are a German language tutor. Generate a 25-minute WEEKLY REVIEW for an adult learner at ${difficulty} targeting B1-B2.
+${LEARNER_PROFILE}
+${EXERCISE_TYPES}
+
+This is a review — no new grammar. Cross-test ALL priority gaps across the 10 exercises.
+
+Return ONLY valid JSON (no markdown, no preamble):
+{
+  "level": "${difficulty}",
+  "theme": "Weekly Review – Gap Check",
+  "grammar": {
+    "title": "Weekly Review",
+    "explanation": "No new material. This session tests all your documented gaps.",
+    "formula": "wuerde/haette/waere | seit + Praesens | Akk (wohin?) vs Dat (wo?)",
+    "tip": "Watch for wurde vs wuerde — one dot, completely different meaning."
+  },
+  "vocab": [
+    { "de": "word", "en": "translation", "note": "review reminder", "kita": false }
+  ],
+  "sentences": [
+    { "de": "sentence with deliberate error", "en": "what it should mean (spot the error)" },
+    { "de": "correct seit + Praesens with Walter", "en": "translation" },
+    { "de": "correct Konjunktiv II daily-life sentence", "en": "translation" }
+  ],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "prompt": "...",
+      "question": "...",
+      "options": ["A","B","C","D"],
+      "answer": 0,
+      "explanation": "..."
+    }
+  ]
+}
+Rules:
+- vocab: exactly 5 items, 1-2 kita:true
+- sentences: exactly 3; sentences[0] must contain a deliberate error
+- exercises: exactly 10, all 4 types, each targeting a different gap from the priority list
+- fill_in / error_spot / translate use the same schema as above`;
 }
 
-function renderLesson(l, isReview) {
+// ── Exercise state ──────────────────────────────────────────────────────────
+let currentLesson = null;
+let exIndex = 0;
+let exResults = []; // true/false per exercise
+
+function renderLesson(lesson, isReview) {
+  currentLesson = lesson;
+  exIndex = 0;
+  exResults = [];
   const out = document.getElementById('lessonOutput');
   let html = '';
 
+  // Tags
   html += `<div style="margin-bottom:16px;">
-    <span class="tag level">${l.level}</span>
+    <span class="tag level">${lesson.level}</span>
     ${isReview ? '<span class="tag review">📋 Weekly Review</span>' : '<span class="tag grammar">Grammar</span><span class="tag vocab">Vocab</span>'}
-    <span style="font-size:0.9rem; font-weight:600; color:var(--text);">${l.theme}</span>
+    <span style="font-size:0.9rem;font-weight:600;color:var(--text);">${lesson.theme}</span>
   </div>`;
 
+  // Grammar
   html += `<div class="lesson-card">
     <div class="section-label">${isReview ? 'Review Summary' : 'Grammar Point'}</div>
     <div class="grammar-block">
-      <div class="grammar-title">${l.grammar.title}</div>
+      <div class="grammar-title">${lesson.grammar.title}</div>
       <div class="grammar-body">
-        ${l.grammar.explanation}
-        <div class="formula">${l.grammar.formula}</div>
-        💡 <em>${l.grammar.tip}</em>
+        ${lesson.grammar.explanation}
+        <div class="formula">${lesson.grammar.formula}</div>
+        💡 <em>${lesson.grammar.tip}</em>
       </div>
     </div>
   </div>`;
 
+  // Vocab
   html += `<div class="lesson-card">
-    <div class="section-label">Vocabulary <span style="color:var(--kita);font-size:0.65rem;">● Kita</span></div>
+    <div class="section-label">Vocabulary <span style="color:var(--kita);font-size:0.65rem">● Kita</span></div>
     <div class="vocab-grid">`;
-  for (const v of l.vocab) {
+  for (const v of lesson.vocab) {
     html += `<div class="vocab-item${v.kita ? ' kita' : ''}">
       ${v.kita ? '<span class="kita-badge">KITA</span>' : ''}
       <div class="vocab-de">${v.de}</div>
@@ -375,60 +369,212 @@ function renderLesson(l, isReview) {
   }
   html += `</div></div>`;
 
+  // Sentences
   const sentLabel = isReview ? 'Sentences — spot the error in #1' : 'Example Sentences';
   html += `<div class="lesson-card">
     <div class="section-label">${sentLabel}</div>
     <ul class="sentences-list">`;
-  for (let i = 0; i < l.sentences.length; i++) {
-    const s = l.sentences[i];
-    const isErrorSpot = isReview && i === 0;
-    html += `<li class="sentence-item${isErrorSpot ? ' error-spot' : ''}">
-      ${isErrorSpot ? '<div style="font-size:0.7rem;color:var(--red);margin-bottom:4px;font-weight:700;">⚠ CONTAINS AN ERROR — find and fix it</div>' : ''}
+  lesson.sentences.forEach((s, i) => {
+    const isErr = isReview && i === 0;
+    html += `<li class="sentence-item${isErr ? ' error-spot' : ''}">
+      ${isErr ? '<div style="font-size:0.7rem;color:var(--red);margin-bottom:4px;font-weight:700;">⚠ CONTAINS AN ERROR — find and fix it</div>' : ''}
       <div class="sentence-de">${s.de}</div>
       <div class="sentence-en">${s.en}</div>
     </li>`;
-  }
+  });
   html += `</ul></div>`;
 
-  const ex = l.exercise;
-  const letters = ['A','B','C','D'];
-  html += `<div class="lesson-card">
-    <div class="section-label">Exercise</div>
-    <div class="exercise-block">
-      <div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
-      <div class="exercise-items" id="exItems">`;
-  for (let i = 0; i < ex.options.length; i++) {
-    html += `<div class="exercise-item" id="opt${i}" onclick="checkAnswer(${i}, ${ex.answer}, '${escapeJs(ex.explanation)}')">
-      <div class="option-letter">${letters[i]}</div>
-      <div>${ex.options[i]}</div>
-    </div>`;
-  }
-  html += `</div><div id="exFeedback"></div></div></div>`;
+  // Exercises container
+  html += `<div class="lesson-card" id="exerciseCard">
+    <div class="section-label">Exercises</div>
+    <div class="exercise-header">
+      <span class="exercise-counter" id="exCounter">1 / 10</span>
+      <div class="exercise-dots" id="exDots">
+        ${lesson.exercises.map((_,i) => `<div class="exercise-dot${i===0?' active':''}" id="dot-${i}"></div>`).join('')}
+      </div>
+    </div>
+    <div id="exBody"></div>
+  </div>
 
-  html += `<div style="text-align:center; margin-top:8px; display:flex; gap:8px; justify-content:center;">
+  <div style="text-align:center;margin-top:8px;display:flex;gap:8px;justify-content:center;">
     <button onclick="generateLesson()" style="background:var(--surface2);color:var(--muted);border-color:var(--border);font-size:0.8rem;padding:8px 20px;">↻ New Lesson</button>
     <button onclick="generateReview()" style="background:rgba(167,139,250,0.1);color:var(--purple);border-color:var(--purple);font-size:0.8rem;padding:8px 20px;">📋 Review</button>
   </div>`;
 
   out.innerHTML = html;
+  renderExercise(0);
 }
 
-function escapeJs(s) { return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"'); }
+function renderExercise(idx) {
+  const ex = currentLesson.exercises[idx];
+  const body = document.getElementById('exBody');
+  document.getElementById('exCounter').textContent = `${idx + 1} / ${currentLesson.exercises.length}`;
 
-function checkAnswer(chosen, correct, explanation) {
-  const items = document.querySelectorAll('.exercise-item');
-  items.forEach(el => el.onclick = null);
-  items[correct].classList.add('revealed');
-  const fb = document.getElementById('exFeedback');
-  if (chosen === correct) {
-    items[chosen].classList.add('correct');
-    fb.innerHTML = `<div class="feedback correct">✓ Correct! ${explanation}</div>`;
-  } else {
-    items[chosen].classList.add('wrong');
-    fb.innerHTML = `<div class="feedback wrong">✗ Not quite. ${explanation}</div>`;
+  // Update dots
+  currentLesson.exercises.forEach((_, i) => {
+    const d = document.getElementById(`dot-${i}`);
+    if (i < idx) {
+      d.className = 'exercise-dot ' + (exResults[i] ? 'done-correct' : 'done-wrong');
+    } else if (i === idx) {
+      d.className = 'exercise-dot active';
+    } else {
+      d.className = 'exercise-dot';
+    }
+  });
+
+  const typeBadge = {
+    multiple_choice: '<span class="exercise-type-badge badge-mc">Multiple Choice</span>',
+    fill_in: '<span class="exercise-type-badge badge-fill">Fill in the Blank</span>',
+    error_spot: '<span class="exercise-type-badge badge-error">Spot the Error</span>',
+    translate: '<span class="exercise-type-badge badge-translate">Translate</span>'
+  }[ex.type] || '';
+
+  let html = typeBadge;
+
+  if (ex.type === 'multiple_choice') {
+    html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
+    <div class="exercise-items" id="mcItems">`;
+    ['A','B','C','D'].forEach((l, i) => {
+      html += `<div class="exercise-item" id="mc-${i}" onclick="submitMC(${i},${ex.answer},'${escJS(ex.explanation)}')">
+        <div class="option-letter">${l}</div><div>${ex.options[i]}</div>
+      </div>`;
+    });
+    html += `</div><div id="exFeedback"></div>`;
+
+  } else if (ex.type === 'fill_in') {
+    html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
+    <div class="text-input-wrap">
+      <input type="text" id="textInput" placeholder="Type your answer…" onkeydown="if(event.key==='Enter')submitText()">
+      <button class="primary" onclick="submitText()">Check</button>
+    </div><div id="exFeedback"></div>`;
+
+  } else if (ex.type === 'error_spot') {
+    html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
+    <div class="text-input-wrap">
+      <input type="text" id="textInput" placeholder="Type the corrected sentence…" onkeydown="if(event.key==='Enter')submitText()">
+      <button class="primary" onclick="submitText()">Check</button>
+    </div><div id="exFeedback"></div>`;
+
+  } else if (ex.type === 'translate') {
+    html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
+    <div class="text-input-wrap">
+      <input type="text" id="textInput" placeholder="Type German translation…" onkeydown="if(event.key==='Enter')submitText()">
+      <button class="primary" onclick="submitText()">Check</button>
+    </div><div id="exFeedback"></div>`;
+  }
+
+  body.innerHTML = html;
+  if (ex.type !== 'multiple_choice') {
+    setTimeout(() => document.getElementById('textInput')?.focus(), 50);
   }
 }
 
+function submitMC(chosen, correct, explanation) {
+  const isCorrect = chosen === correct;
+  exResults.push(isCorrect);
+  document.querySelectorAll('.exercise-item').forEach(el => el.onclick = null);
+  document.getElementById(`mc-${correct}`).classList.add('revealed');
+  if (!isCorrect) document.getElementById(`mc-${chosen}`).classList.add('wrong');
+  document.getElementById('exFeedback').innerHTML =
+    `<div class="feedback ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? '✓ Correct! ' : '✗ Not quite. '}${explanation}</div>`;
+  showNextBtn();
+}
+
+function submitText() {
+  const ex = currentLesson.exercises[exIndex];
+  const input = document.getElementById('textInput');
+  const val = input.value.trim();
+  if (!val) return;
+
+  // Fuzzy match: lowercase, strip punctuation, compare
+  const normalise = s => s.toLowerCase().replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ').trim();
+  const correct = ex.correct_answer || ex.correct_sentence || '';
+  const isCorrect = normalise(val) === normalise(correct);
+
+  input.className = isCorrect ? 'correct' : 'wrong';
+  input.disabled = true;
+  exResults.push(isCorrect);
+
+  document.getElementById('exFeedback').innerHTML =
+    `<div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
+      ${isCorrect ? '✓ Correct!' : `✗ Not quite. Correct: <strong>${correct}</strong>`}
+      <br><span style="font-size:0.8rem;opacity:0.85">${ex.explanation}</span>
+    </div>`;
+  showNextBtn();
+}
+
+function showNextBtn() {
+  const isLast = exIndex === currentLesson.exercises.length - 1;
+  const fb = document.getElementById('exFeedback');
+  const btn = document.createElement('button');
+  btn.className = 'next-btn';
+  btn.textContent = isLast ? '🎉 See Results' : 'Next Exercise →';
+  btn.onclick = isLast ? showScore : nextExercise;
+  fb.appendChild(btn);
+}
+
+function nextExercise() {
+  exIndex++;
+  renderExercise(exIndex);
+  document.getElementById('exerciseCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showScore() {
+  const score = exResults.filter(Boolean).length;
+  const total = exResults.length;
+  const pct = Math.round((score / total) * 100);
+  const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '✅' : pct >= 50 ? '💪' : '📚';
+
+  const dots = exResults.map(r =>
+    `<div class="score-dot" style="background:${r ? 'var(--green)' : 'var(--red)'}"></div>`
+  ).join('');
+
+  document.getElementById('exBody').innerHTML = `
+    <div class="score-card">
+      <div class="score-big">${emoji} ${score}/${total}</div>
+      <div class="score-label">${pct}% — ${pct >= 90 ? 'Ausgezeichnet!' : pct >= 70 ? 'Gut gemacht!' : pct >= 50 ? 'Weiter so!' : 'Keep drilling — you\'ll get there.'}</div>
+      <div class="score-dots">${dots}</div>
+      <button class="primary" onclick="generateLesson()" style="padding:10px 28px">Next Lesson →</button>
+    </div>`;
+
+  // Update dots bar
+  currentLesson.exercises.forEach((_, i) => {
+    const d = document.getElementById(`dot-${i}`);
+    if (d) d.className = 'exercise-dot ' + (exResults[i] ? 'done-correct' : 'done-wrong');
+  });
+  document.getElementById('exCounter').textContent = `${total} / ${total}`;
+}
+
+function escJS(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
+
+// ── Generate ────────────────────────────────────────────────────────────────
+async function generateLesson() {
+  const btn = document.getElementById('generateBtn');
+  const topic = document.getElementById('topicSeed').value;
+  const difficulty = document.getElementById('difficultySelect').value;
+  btn.disabled = true;
+  document.getElementById('lessonOutput').innerHTML = `<div class="loading"><div class="spinner"></div>Generating your lesson…</div>`;
+  try {
+    const lesson = await callAPI(buildPrompt(topic, difficulty));
+    renderLesson(lesson, false);
+  } catch(e) {
+    document.getElementById('lessonOutput').innerHTML = `<div class="error">Failed: ${e.message}</div>`;
+  } finally { btn.disabled = false; }
+}
+
+async function generateReview() {
+  const difficulty = document.getElementById('difficultySelect').value;
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('lessonOutput').innerHTML = `<div class="loading"><div class="spinner"></div>Building weekly review…</div>`;
+  try {
+    const lesson = await callAPI(buildReviewPrompt(difficulty));
+    renderLesson(lesson, true);
+  } catch(e) {
+    document.getElementById('lessonOutput').innerHTML = `<div class="error">Failed: ${e.message}</div>`;
+  } finally { document.getElementById('generateBtn').disabled = false; }
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
 setDateLine();
 updateStreakUI();
 generateLesson();
