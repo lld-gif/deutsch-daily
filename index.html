@@ -219,15 +219,16 @@ LEARNER PROFILE (from diagnostic):
 - STRENGTHS (scaffold on, don't re-drill): subordinate clause word order, Kita vocab, Perfekt tense.`;
 
 const EXERCISE_TYPES = `
-Exercise types to use across the 10 exercises (mix all four):
-- "multiple_choice": question with ___ gap, 4 options A-D, answer is index 0-3.
-- "fill_in": sentence with ___ gap, correct_answer is exact string expected (accept minor typos).
-- "error_spot": a German sentence with one deliberate error, correct_sentence is the fixed version, explanation says what was wrong.
-- "translate": an English sentence to translate to German, correct_answer is the target German sentence.
+Exercise types — use ONLY these two (mix roughly 60/40):
+- "multiple_choice": A German sentence with ___ gap. Provide 4 options A-D. answer is index 0-3.
+  - Wrong options MUST mirror the learner's documented error patterns (e.g. wurde vs wuerde, wrong case after two-way preposition, dropped preposition, wrong conjugation).
+  - explanation field: always explain WHY each wrong option is wrong, not just why the right one is right.
+- "fill_in": A German sentence with ___ gap. correct_answer is the exact word(s) expected.
+  - explanation field: explain why this answer is correct AND what a learner might wrongly write instead and why that's wrong.
 
 For exercises 1-7: target today's grammar point primarily.
-For exercises 8-10: cross-test previous gaps from the priority list above (rotate so no two lessons test the same gap in slot 8-10).
-Wrong options for multiple_choice must mirror the learner's documented error patterns (e.g. wurde vs wuerde).`;
+For exercises 8-10: cross-test previous gaps from the priority list (rotate — no two lessons test the same gap in slots 8-10).
+CRITICAL: Every exercise must have a rich explanation field that teaches — not just confirms the answer.`;
 
 function buildPrompt(topic, difficulty) {
   const topicMap = {
@@ -274,10 +275,10 @@ Return ONLY valid JSON (no markdown, no preamble):
 Rules:
 - vocab: exactly 5 items, 1-2 kita:true
 - sentences: exactly 3, at least 1 usable with Walter
-- exercises: exactly 10 items mixing all 4 types. First 7 target today's grammar. Last 3 cross-test previous gaps.
-- fill_in and error_spot and translate exercises use: { "type":"fill_in"|"error_spot"|"translate", "prompt":"...", "question":"...", "correct_answer":"...", "explanation":"..." }
-- error_spot also includes "correct_sentence" field
-- Wrong MC options must reflect learner's known errors`;
+- exercises: exactly 10 items, mix of multiple_choice and fill_in ONLY. First 7 target today's grammar. Last 3 cross-test previous gaps.
+- fill_in exercises use: { "type":"fill_in", "prompt":"...", "question":"sentence with ___", "correct_answer":"exact word(s)", "explanation":"why correct + what a wrong answer looks like and why it fails" }
+- multiple_choice explanation MUST explain why each wrong option is wrong, referencing the learner's documented error patterns
+- Wrong MC options must mirror: wurde/wuerde confusion, wrong case after two-way prepositions, dropped prepositions, wrong 3rd-person conjugation`;
 }
 
 function buildReviewPrompt(difficulty) {
@@ -319,8 +320,9 @@ Return ONLY valid JSON (no markdown, no preamble):
 Rules:
 - vocab: exactly 5 items, 1-2 kita:true
 - sentences: exactly 3; sentences[0] must contain a deliberate error
-- exercises: exactly 10, all 4 types, each targeting a different gap from the priority list
-- fill_in / error_spot / translate use the same schema as above`;
+- exercises: exactly 10, mix of multiple_choice and fill_in only, each targeting a different gap from the priority list
+- fill_in uses: { "type":"fill_in", "prompt":"...", "question":"...", "correct_answer":"...", "explanation":"..." }
+- Every explanation must explain why wrong answers are wrong, not just confirm the right one`;
 }
 
 // ── Exercise state ──────────────────────────────────────────────────────────
@@ -425,8 +427,6 @@ function renderExercise(idx) {
   const typeBadge = {
     multiple_choice: '<span class="exercise-type-badge badge-mc">Multiple Choice</span>',
     fill_in: '<span class="exercise-type-badge badge-fill">Fill in the Blank</span>',
-    error_spot: '<span class="exercise-type-badge badge-error">Spot the Error</span>',
-    translate: '<span class="exercise-type-badge badge-translate">Translate</span>'
   }[ex.type] || '';
 
   let html = typeBadge;
@@ -448,19 +448,6 @@ function renderExercise(idx) {
       <button class="primary" onclick="submitText()">Check</button>
     </div><div id="exFeedback"></div>`;
 
-  } else if (ex.type === 'error_spot') {
-    html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
-    <div class="text-input-wrap">
-      <input type="text" id="textInput" placeholder="Type the corrected sentence…" onkeydown="if(event.key==='Enter')submitText()">
-      <button class="primary" onclick="submitText()">Check</button>
-    </div><div id="exFeedback"></div>`;
-
-  } else if (ex.type === 'translate') {
-    html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
-    <div class="text-input-wrap">
-      <input type="text" id="textInput" placeholder="Type German translation…" onkeydown="if(event.key==='Enter')submitText()">
-      <button class="primary" onclick="submitText()">Check</button>
-    </div><div id="exFeedback"></div>`;
   }
 
   body.innerHTML = html;
@@ -472,11 +459,25 @@ function renderExercise(idx) {
 function submitMC(chosen, correct, explanation) {
   const isCorrect = chosen === correct;
   exResults.push(isCorrect);
-  document.querySelectorAll('.exercise-item').forEach(el => el.onclick = null);
+  const items = document.querySelectorAll('.exercise-item');
+  items.forEach(el => el.onclick = null);
+  // Always reveal correct answer
   document.getElementById(`mc-${correct}`).classList.add('revealed');
-  if (!isCorrect) document.getElementById(`mc-${chosen}`).classList.add('wrong');
-  document.getElementById('exFeedback').innerHTML =
-    `<div class="feedback ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? '✓ Correct! ' : '✗ Not quite. '}${explanation}</div>`;
+  if (!isCorrect) {
+    document.getElementById(`mc-${chosen}`).classList.add('wrong');
+    const correctText = items[correct].querySelector('div:last-child').textContent;
+    document.getElementById('exFeedback').innerHTML =
+      `<div class="feedback wrong">
+        <strong>✗ Not quite.</strong> The correct answer is <strong>${correctText}</strong>.<br>
+        <span style="font-size:0.82rem;opacity:0.9;margin-top:4px;display:block">${explanation}</span>
+      </div>`;
+  } else {
+    document.getElementById('exFeedback').innerHTML =
+      `<div class="feedback correct">
+        <strong>✓ Correct!</strong>
+        <span style="font-size:0.82rem;opacity:0.9;margin-top:4px;display:block">${explanation}</span>
+      </div>`;
+  }
   showNextBtn();
 }
 
@@ -486,8 +487,11 @@ function submitText() {
   const val = input.value.trim();
   if (!val) return;
 
-  // Fuzzy match: lowercase, strip punctuation, compare
-  const normalise = s => s.toLowerCase().replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ').trim();
+  const normalise = s => s.toLowerCase().replace(/[.,!?;:'"äöüÄÖÜß]/g, c => {
+    const map = {'ä':'ae','ö':'oe','ü':'ue','ß':'ss','Ä':'ae','Ö':'oe','Ü':'ue'};
+    return map[c] || c;
+  }).replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ').trim();
+
   const correct = ex.correct_answer || ex.correct_sentence || '';
   const isCorrect = normalise(val) === normalise(correct);
 
@@ -495,11 +499,20 @@ function submitText() {
   input.disabled = true;
   exResults.push(isCorrect);
 
-  document.getElementById('exFeedback').innerHTML =
-    `<div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
-      ${isCorrect ? '✓ Correct!' : `✗ Not quite. Correct: <strong>${correct}</strong>`}
-      <br><span style="font-size:0.8rem;opacity:0.85">${ex.explanation}</span>
-    </div>`;
+  if (isCorrect) {
+    document.getElementById('exFeedback').innerHTML =
+      `<div class="feedback correct">
+        <strong>✓ Correct!</strong>
+        <span style="font-size:0.82rem;opacity:0.9;margin-top:4px;display:block">${ex.explanation}</span>
+      </div>`;
+  } else {
+    document.getElementById('exFeedback').innerHTML =
+      `<div class="feedback wrong">
+        <strong>✗ Not quite.</strong> You wrote: <em>${val}</em><br>
+        <span style="color:var(--green);font-weight:600">✓ Correct answer: ${correct}</span><br>
+        <span style="font-size:0.82rem;opacity:0.9;margin-top:6px;display:block">${ex.explanation}</span>
+      </div>`;
+  }
   showNextBtn();
 }
 
