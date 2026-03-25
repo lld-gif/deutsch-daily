@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/config/:path*", "destination": "/config/:path*" },
     { "source": "/(.*)", "destination": "/public/$1" }
   ],
   "functions": {
