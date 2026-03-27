@@ -36,7 +36,12 @@
     <option value="B1-B2" selected>B1–B2</option>
     <option value="B2">B2</option>
   </select>
+  <select id="exerciseCount">
+    <option value="10" selected>10 exercises</option>
+    <option value="20">20 exercises</option>
+  </select>
   <span class="spacer"></span>
+  <button class="review-btn" onclick="openWordBank()" id="wordBankBtn">📖 Word Bank <span class="word-bank-count" id="wbCount" style="display:none">0</span></button>
   <button class="review-btn" onclick="generateReview()">📋 Weekly Review</button>
   <button class="primary" id="generateBtn" onclick="generateLesson()">Generate Lesson</button>
 </div>
@@ -45,10 +50,9 @@
 
 <script type="module">
 import { buildPrompt, buildReviewPrompt } from './config/prompts.js';
-import { MODEL, API_URL, MAX_TOKENS } from './config/settings.js';
+import { MODEL, API_URL, MAX_TOKENS, MAX_TOKENS_20 } from './config/settings.js';
 
 // ── State ──────────────────────────────────────────────────────────────────
-// ── Session history (prevents same lesson repeating within a day) ──────────
 function getTodayHistory() {
   try {
     const today = new Date().toDateString();
@@ -73,6 +77,134 @@ function getState() {
 }
 function saveState(s) { try { localStorage.setItem('de_lesson_state', JSON.stringify(s)); } catch {} }
 
+// ── Missed exercises (feature 3) ──────────────────────────────────────────
+function getMissedExercises() {
+  try { return JSON.parse(localStorage.getItem('de_missed_exercises') || '[]'); }
+  catch { return []; }
+}
+function addMissedExercise(ex) {
+  try {
+    const missed = getMissedExercises();
+    missed.push({
+      question: ex.question,
+      correct_answer: ex.correct_answer || ex.options?.[ex.answer] || '',
+      type: ex.type,
+      explanation: ex.explanation,
+      date: new Date().toDateString()
+    });
+    // Keep max 20, FIFO
+    while (missed.length > 20) missed.shift();
+    localStorage.setItem('de_missed_exercises', JSON.stringify(missed));
+  } catch {}
+}
+
+// ── Grammar history across days (feature 6) ──────────────────────────────
+function getGrammarHistory() {
+  try {
+    const data = JSON.parse(localStorage.getItem('de_grammar_all') || '[]');
+    const cutoff = Date.now() - 14 * 86400000;
+    return data.filter(g => new Date(g.date).getTime() > cutoff);
+  } catch { return []; }
+}
+function addGrammarHistory(title) {
+  try {
+    const data = getGrammarHistory();
+    if (!data.some(g => g.title === title)) {
+      data.push({ title, date: new Date().toDateString() });
+    }
+    localStorage.setItem('de_grammar_all', JSON.stringify(data));
+  } catch {}
+}
+
+// ── Sentence themes (feature 4) ──────────────────────────────────────────
+function getSentenceThemes() {
+  try {
+    const data = JSON.parse(localStorage.getItem('de_sentence_themes') || '[]');
+    const cutoff = Date.now() - 3 * 86400000;
+    return data.filter(s => new Date(s.date).getTime() > cutoff).map(s => s.theme);
+  } catch { return []; }
+}
+function addSentenceThemes(sentences) {
+  try {
+    const data = JSON.parse(localStorage.getItem('de_sentence_themes') || '[]');
+    const today = new Date().toDateString();
+    for (const s of sentences) {
+      const theme = s.de.substring(0, 40);
+      data.push({ theme, date: today });
+    }
+    while (data.length > 15) data.shift();
+    localStorage.setItem('de_sentence_themes', JSON.stringify(data));
+  } catch {}
+}
+
+// ── Word bank (feature 7) ────────────────────────────────────────────────
+function getWordBank() {
+  try { return JSON.parse(localStorage.getItem('de_word_bank') || '[]'); }
+  catch { return []; }
+}
+function addToWordBank(vocabItems) {
+  try {
+    const bank = getWordBank();
+    const existing = new Set(bank.map(w => w.de.toLowerCase()));
+    const today = new Date().toDateString();
+    for (const v of vocabItems) {
+      if (!existing.has(v.de.toLowerCase())) {
+        bank.push({ de: v.de, en: v.en, note: v.note || '', kita: !!v.kita, date: today });
+        existing.add(v.de.toLowerCase());
+      }
+    }
+    localStorage.setItem('de_word_bank', JSON.stringify(bank));
+    updateWordBankCount();
+  } catch {}
+}
+function updateWordBankCount() {
+  const count = getWordBank().length;
+  const el = document.getElementById('wbCount');
+  if (count > 0) { el.style.display = 'inline'; el.textContent = count; }
+  else { el.style.display = 'none'; }
+}
+
+function openWordBank() {
+  const bank = getWordBank().sort((a, b) => a.de.localeCompare(b.de, 'de'));
+  const overlay = document.createElement('div');
+  overlay.className = 'word-bank-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  const renderList = (filter = '') => {
+    const filtered = filter
+      ? bank.filter(w => w.de.toLowerCase().includes(filter) || w.en.toLowerCase().includes(filter))
+      : bank;
+    if (filtered.length === 0) return '<div class="word-bank-empty">No words found</div>';
+    return filtered.map(w =>
+      `<div class="word-bank-item${w.kita ? ' wb-kita' : ''}">
+        <span class="wb-de">${w.de}</span>
+        <span class="wb-en">${w.en}${w.note ? ' · ' + w.note : ''}</span>
+        <span class="wb-date">${w.date}</span>
+      </div>`
+    ).join('');
+  };
+
+  overlay.innerHTML = `
+    <div class="word-bank-modal">
+      <div class="word-bank-header">
+        <h2>📖 Word Bank</h2>
+        <span style="color:var(--muted);font-size:0.85rem">${bank.length} words</span>
+        <button class="word-bank-close" id="wbClose">✕</button>
+      </div>
+      <div class="word-bank-search">
+        <input type="text" id="wbSearch" placeholder="Search words…">
+      </div>
+      <div class="word-bank-list" id="wbList">${renderList()}</div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('wbClose').onclick = () => overlay.remove();
+  document.getElementById('wbSearch').oninput = e => {
+    document.getElementById('wbList').innerHTML = renderList(e.target.value.toLowerCase());
+  };
+  document.getElementById('wbSearch').focus();
+}
+
+// ── Streak UI ────────────────────────────────────────────────────────────
 function updateStreakUI() {
   const today = new Date().toDateString();
   const s = getState();
@@ -105,11 +237,15 @@ function setDateLine() {
 }
 
 // ── API ────────────────────────────────────────────────────────────────────
+function getExerciseCount() {
+  return parseInt(document.getElementById('exerciseCount').value, 10) || 10;
+}
 async function callAPI(prompt) {
+  const tokens = getExerciseCount() >= 20 ? MAX_TOKENS_20 : MAX_TOKENS;
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: MAX_TOKENS,
+    body: JSON.stringify({ model: MODEL, max_tokens: tokens,
       messages: [{ role: 'user', content: prompt }] })
   });
   if (!res.ok) throw new Error(`API error ${res.status}`);
@@ -121,12 +257,19 @@ async function callAPI(prompt) {
 // ── Exercise state ──────────────────────────────────────────────────────────
 let currentLesson = null;
 let exIndex = 0;
-let exResults = []; // true/false per exercise
+let exResults = [];
 
 function renderLesson(lesson, isReview) {
   currentLesson = lesson;
   exIndex = 0;
   exResults = [];
+
+  // Save vocab to word bank (feature 7)
+  if (lesson.vocab) addToWordBank(lesson.vocab);
+
+  // Track sentence themes (feature 4)
+  if (lesson.sentences) addSentenceThemes(lesson.sentences);
+
   const out = document.getElementById('lessonOutput');
   let html = '';
 
@@ -150,21 +293,30 @@ function renderLesson(lesson, isReview) {
     </div>
   </div>`;
 
-  // Vocab
+  // Vocab (feature 5: conjugations for verbs)
   html += `<div class="lesson-card">
     <div class="section-label">Vocabulary <span style="color:var(--kita);font-size:0.65rem">● Kita</span></div>
     <div class="vocab-grid">`;
   for (const v of lesson.vocab) {
+    let conjugationHtml = '';
+    if (v.conjugation) {
+      conjugationHtml = `<div class="conjugation-table">
+        ${Object.entries(v.conjugation).map(([pron, form]) =>
+          `<span class="conj-pronoun">${pron}</span><span class="conj-form">${form}</span>`
+        ).join('')}
+      </div>`;
+    }
     html += `<div class="vocab-item${v.kita ? ' kita' : ''}">
       ${v.kita ? '<span class="kita-badge">KITA</span>' : ''}
       <div class="vocab-de">${v.de}</div>
       <div class="vocab-en">${v.en}</div>
       ${v.note ? `<div class="vocab-note">${v.note}</div>` : ''}
+      ${conjugationHtml}
     </div>`;
   }
   html += `</div></div>`;
 
-  // Sentences
+  // Sentences (feature 4: explanations)
   const sentLabel = isReview ? 'Sentences — spot the error in #1' : 'Example Sentences';
   html += `<div class="lesson-card">
     <div class="section-label">${sentLabel}</div>
@@ -175,15 +327,17 @@ function renderLesson(lesson, isReview) {
       ${isErr ? '<div style="font-size:0.7rem;color:var(--red);margin-bottom:4px;font-weight:700;">⚠ CONTAINS AN ERROR — find and fix it</div>' : ''}
       <div class="sentence-de">${s.de}</div>
       <div class="sentence-en">${s.en}</div>
+      ${s.explanation ? `<div class="sentence-explanation">💡 ${s.explanation}</div>` : ''}
     </li>`;
   });
   html += `</ul></div>`;
 
   // Exercises container
+  const exCount = lesson.exercises.length;
   html += `<div class="lesson-card" id="exerciseCard">
     <div class="section-label">Exercises</div>
     <div class="exercise-header">
-      <span class="exercise-counter" id="exCounter">1 / 10</span>
+      <span class="exercise-counter" id="exCounter">1 / ${exCount}</span>
       <div class="exercise-dots" id="exDots">
         ${lesson.exercises.map((_,i) => `<div class="exercise-dot${i===0?' active':''}" id="dot-${i}"></div>`).join('')}
       </div>
@@ -205,7 +359,6 @@ function renderExercise(idx) {
   const body = document.getElementById('exBody');
   document.getElementById('exCounter').textContent = `${idx + 1} / ${currentLesson.exercises.length}`;
 
-  // Update dots
   currentLesson.exercises.forEach((_, i) => {
     const d = document.getElementById(`dot-${i}`);
     if (i < idx) {
@@ -228,7 +381,7 @@ function renderExercise(idx) {
     html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
     <div class="exercise-items" id="mcItems">`;
     ['A','B','C','D'].forEach((l, i) => {
-      html += `<div class="exercise-item" id="mc-${i}" onclick="submitMC(${i},${ex.answer},'${escJS(ex.explanation)}')">
+      html += `<div class="exercise-item" id="mc-${i}" onclick="submitMC(${i},${ex.answer},'${escJS(ex.explanation)}','${escJS(ex.translation || '')}')">
         <div class="option-letter">${l}</div><div>${ex.options[i]}</div>
       </div>`;
     });
@@ -240,7 +393,6 @@ function renderExercise(idx) {
       <input type="text" id="textInput" placeholder="Type your answer…" onkeydown="if(event.key==='Enter')submitText()">
       <button class="primary" onclick="submitText()">Check</button>
     </div><div id="exFeedback"></div>`;
-
   }
 
   body.innerHTML = html;
@@ -249,13 +401,21 @@ function renderExercise(idx) {
   }
 }
 
-function submitMC(chosen, correct, explanation) {
+// Feature 2: translation shown in feedback. Feature 3: missed exercises saved.
+function submitMC(chosen, correct, explanation, translation) {
+  const ex = currentLesson.exercises[exIndex];
   const isCorrect = chosen === correct;
   exResults.push(isCorrect);
+
+  // Feature 3: save missed exercise
+  if (!isCorrect) addMissedExercise(ex);
+
   const items = document.querySelectorAll('.exercise-item');
   items.forEach(el => el.onclick = null);
-  // Always reveal correct answer
   document.getElementById(`mc-${correct}`).classList.add('revealed');
+
+  const translationHtml = translation ? `<div class="exercise-translation">📝 ${translation}</div>` : '';
+
   if (!isCorrect) {
     document.getElementById(`mc-${chosen}`).classList.add('wrong');
     const correctText = items[correct].querySelector('div:last-child').textContent;
@@ -263,13 +423,13 @@ function submitMC(chosen, correct, explanation) {
       `<div class="feedback wrong">
         <strong>✗ Not quite.</strong> The correct answer is <strong>${correctText}</strong>.<br>
         <span style="font-size:0.82rem;opacity:0.9;margin-top:4px;display:block">${explanation}</span>
-      </div>`;
+      </div>${translationHtml}`;
   } else {
     document.getElementById('exFeedback').innerHTML =
       `<div class="feedback correct">
         <strong>✓ Correct!</strong>
         <span style="font-size:0.82rem;opacity:0.9;margin-top:4px;display:block">${explanation}</span>
-      </div>`;
+      </div>${translationHtml}`;
   }
   showNextBtn();
 }
@@ -292,19 +452,24 @@ function submitText() {
   input.disabled = true;
   exResults.push(isCorrect);
 
+  // Feature 3: save missed exercise
+  if (!isCorrect) addMissedExercise(ex);
+
+  const translationHtml = ex.translation ? `<div class="exercise-translation">📝 ${ex.translation}</div>` : '';
+
   if (isCorrect) {
     document.getElementById('exFeedback').innerHTML =
       `<div class="feedback correct">
         <strong>✓ Correct!</strong>
         <span style="font-size:0.82rem;opacity:0.9;margin-top:4px;display:block">${ex.explanation}</span>
-      </div>`;
+      </div>${translationHtml}`;
   } else {
     document.getElementById('exFeedback').innerHTML =
       `<div class="feedback wrong">
         <strong>✗ Not quite.</strong> You wrote: <em>${val}</em><br>
         <span style="color:var(--green);font-weight:600">✓ Correct answer: ${correct}</span><br>
         <span style="font-size:0.82rem;opacity:0.9;margin-top:6px;display:block">${ex.explanation}</span>
-      </div>`;
+      </div>${translationHtml}`;
   }
   showNextBtn();
 }
@@ -325,9 +490,10 @@ function nextExercise() {
   document.getElementById('exerciseCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// Feature 1: denominator is always currentLesson.exercises.length
 function showScore() {
+  const total = currentLesson.exercises.length;
   const score = exResults.filter(Boolean).length;
-  const total = exResults.length;
   const pct = Math.round((score / total) * 100);
   const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '✅' : pct >= 50 ? '💪' : '📚';
 
@@ -343,7 +509,6 @@ function showScore() {
       <button class="primary" onclick="generateLesson()" style="padding:10px 28px">Next Lesson →</button>
     </div>`;
 
-  // Update dots bar
   currentLesson.exercises.forEach((_, i) => {
     const d = document.getElementById(`dot-${i}`);
     if (d) d.className = 'exercise-dot ' + (exResults[i] ? 'done-correct' : 'done-wrong');
@@ -358,11 +523,18 @@ async function generateLesson() {
   const btn = document.getElementById('generateBtn');
   const topic = document.getElementById('topicSeed').value;
   const difficulty = document.getElementById('difficultySelect').value;
+  const exerciseCount = getExerciseCount();
   btn.disabled = true;
   document.getElementById('lessonOutput').innerHTML = `<div class="loading"><div class="spinner"></div>Generating your lesson…</div>`;
   try {
-    const lesson = await callAPI(buildPrompt(topic, difficulty, getTodayHistory()));
+    const lesson = await callAPI(buildPrompt(topic, difficulty, getTodayHistory(), {
+      exerciseCount,
+      missedExercises: getMissedExercises().slice(-5),
+      grammarHistory: getGrammarHistory(),
+      sentenceThemes: getSentenceThemes()
+    }));
     addToHistory(lesson.theme, lesson.grammar?.title);
+    addGrammarHistory(lesson.grammar?.title);
     renderLesson(lesson, false);
   } catch(e) {
     document.getElementById('lessonOutput').innerHTML = `<div class="error">Failed: ${e.message}</div>`;
@@ -371,25 +543,28 @@ async function generateLesson() {
 
 async function generateReview() {
   const difficulty = document.getElementById('difficultySelect').value;
+  const exerciseCount = getExerciseCount();
   document.getElementById('generateBtn').disabled = true;
   document.getElementById('lessonOutput').innerHTML = `<div class="loading"><div class="spinner"></div>Building weekly review…</div>`;
   try {
-    const lesson = await callAPI(buildReviewPrompt(difficulty));
+    const lesson = await callAPI(buildReviewPrompt(difficulty, { exerciseCount }));
     renderLesson(lesson, true);
   } catch(e) {
     document.getElementById('lessonOutput').innerHTML = `<div class="error">Failed: ${e.message}</div>`;
   } finally { document.getElementById('generateBtn').disabled = false; }
 }
 
-// Expose functions to global scope for onclick handlers in HTML
+// Expose to global scope for onclick handlers
 window.generateLesson = generateLesson;
 window.generateReview = generateReview;
 window.submitMC = submitMC;
 window.submitText = submitText;
+window.openWordBank = openWordBank;
 
 // ── Init ────────────────────────────────────────────────────────────────────
 setDateLine();
 updateStreakUI();
+updateWordBankCount();
 generateLesson();
 </script>
 </body>

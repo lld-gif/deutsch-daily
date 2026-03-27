@@ -1,6 +1,7 @@
 export const MODEL = 'claude-sonnet-4-20250514';
 export const API_URL = '/api/chat';
 export const MAX_TOKENS = 2500;
+export const MAX_TOKENS_20 = 4000;
 
 export const TOPIC_MAP = {
   auto: 'choose a practical daily-life topic that pairs well with the grammar point',
