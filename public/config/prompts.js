@@ -25,7 +25,8 @@ Exercise types — use ONLY these two (mix roughly 60/40):
   - translation field: ALWAYS include an English translation of the complete sentence (with the correct answer filled in).
 
 CRITICAL: Every exercise must have a rich explanation field that teaches — not just confirms the answer.
-CRITICAL: Every exercise must have a translation field with the full English translation.`;
+CRITICAL: Every exercise must have a translation field with the full English translation.
+CRITICAL: Randomize which option (0-3) is the correct answer. Do NOT always put the correct answer at index 0 or 1. Distribute evenly across all four positions.`;
 
 export function buildPrompt(topic, difficulty, todayHistory, { exerciseCount = 10, missedExercises = [], grammarHistory = [], sentenceThemes = [] } = {}) {
   const missedSection = missedExercises.length > 0
@@ -80,7 +81,7 @@ Return ONLY valid JSON (no markdown, no preamble):
       "prompt": "instruction",
       "question": "sentence with ___",
       "options": ["A","B","C","D"],
-      "answer": 0,
+      "answer": 2,
       "explanation": "why correct, name the error pattern avoided",
       "translation": "full English translation of the sentence with correct answer"
     }
@@ -131,7 +132,7 @@ Return ONLY valid JSON (no markdown, no preamble):
       "prompt": "...",
       "question": "...",
       "options": ["A","B","C","D"],
-      "answer": 0,
+      "answer": 2,
       "explanation": "...",
       "translation": "full English translation of the sentence with correct answer"
     }
