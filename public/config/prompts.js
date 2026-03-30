@@ -91,7 +91,8 @@ Return ONLY valid JSON (no markdown, no preamble):
   ]
 }
 Rules:
-- vocab: exactly 5 items, 1-2 kita:true. If the word is a VERB, include a "conjugation" object with keys: ich, du, er/sie/es, wir, ihr, sie/Sie (present tense). For non-verbs, OMIT the conjugation field entirely.
+- vocab: exactly 5 items, 1-2 kita:true.
+- CRITICAL: If a vocab word is a VERB, you MUST include a "conjugation" object with keys: ich, du, er/sie/es, wir, ihr, sie/Sie (present tense forms). This is required for EVERY verb in the vocab list. For non-verbs, OMIT the conjugation field entirely.
 - sentences: exactly 3, at least 1 usable with Walter. Each sentence MUST have an "explanation" field (1-2 sentences) explaining the grammar or usage pattern demonstrated.
 - ${targetExercises}
 - fill_in exercises use: { "type":"fill_in", "prompt":"...", "question":"sentence with ___", "correct_answer":"exact word(s)", "alt_answers":["other valid answer", ...], "explanation":"why correct + what a wrong answer looks like and why it fails", "translation":"English translation of the full sentence" }
@@ -143,7 +144,8 @@ Return ONLY valid JSON (no markdown, no preamble):
   ]
 }
 Rules:
-- vocab: exactly 5 items, 1-2 kita:true. If the word is a VERB, include a "conjugation" object. For non-verbs, omit it.
+- vocab: exactly 5 items, 1-2 kita:true.
+- CRITICAL: If a vocab word is a VERB, you MUST include a "conjugation" object with keys: ich, du, er/sie/es, wir, ihr, sie/Sie (present tense forms). This is required for EVERY verb. For non-verbs, OMIT the conjugation field entirely.
 - sentences: exactly 3; sentences[0] must contain a deliberate error. Each sentence MUST have an "explanation" field.
 - ${targetExercises}
 - fill_in uses: { "type":"fill_in", "prompt":"...", "question":"...", "correct_answer":"...", "alt_answers":[], "explanation":"...", "translation":"..." }
