@@ -20,7 +20,7 @@ Exercise types — use ONLY these two (mix roughly 60/40):
   - Wrong options MUST mirror the learner's documented error patterns (e.g. wurde vs wuerde, wrong case after two-way preposition, dropped preposition, wrong conjugation).
   - explanation field: always explain WHY each wrong option is wrong, not just why the right one is right.
   - translation field: ALWAYS include an English translation of the complete sentence (with the correct answer filled in).
-- "fill_in": A German sentence with ___ gap. correct_answer is the exact word(s) expected.
+- "fill_in": A German sentence with ___ gap. correct_answer is the exact word(s) expected. alt_answers is an array of other grammatically correct completions (may be empty).
   - explanation field: explain why this answer is correct AND what a learner might wrongly write instead and why that's wrong.
   - translation field: ALWAYS include an English translation of the complete sentence (with the correct answer filled in).
 
@@ -28,6 +28,7 @@ CRITICAL: Every exercise must have a rich explanation field that teaches — not
 CRITICAL: Every exercise must have a translation field with the full English translation.
 CRITICAL: Randomize which option (0-3) is the correct answer. Do NOT always put the correct answer at index 0 or 1. Distribute evenly across all four positions.
 CRITICAL: All four multiple_choice options MUST have unique text. Never repeat the same option string twice.
+CRITICAL: In multiple_choice explanations, refer to wrong options by their TEXT CONTENT (e.g. "'wurde' is wrong because…"), NEVER by letter (e.g. "Option D is wrong"). The option positions may vary.
 CRITICAL: fill_in correct_answer MUST use vocabulary or grammar forms introduced in THIS lesson's vocab or grammar sections. Do not test words the learner has not seen in the lesson.`;
 
 export function buildPrompt(topic, difficulty, todayHistory, { exerciseCount = 10, missedExercises = [], grammarHistory = [], sentenceThemes = [] } = {}) {
@@ -93,7 +94,8 @@ Rules:
 - vocab: exactly 5 items, 1-2 kita:true. If the word is a VERB, include a "conjugation" object with keys: ich, du, er/sie/es, wir, ihr, sie/Sie (present tense). For non-verbs, OMIT the conjugation field entirely.
 - sentences: exactly 3, at least 1 usable with Walter. Each sentence MUST have an "explanation" field (1-2 sentences) explaining the grammar or usage pattern demonstrated.
 - ${targetExercises}
-- fill_in exercises use: { "type":"fill_in", "prompt":"...", "question":"sentence with ___", "correct_answer":"exact word(s)", "explanation":"why correct + what a wrong answer looks like and why it fails", "translation":"English translation of the full sentence" }
+- fill_in exercises use: { "type":"fill_in", "prompt":"...", "question":"sentence with ___", "correct_answer":"exact word(s)", "alt_answers":["other valid answer", ...], "explanation":"why correct + what a wrong answer looks like and why it fails", "translation":"English translation of the full sentence" }
+- fill_in alt_answers: include any other grammatically correct completions (e.g. if correct is "spielen können", include ["spielen will","spielen dürfen"] if those also work). Use an empty array [] if no alternatives exist.
 - multiple_choice explanation MUST explain why each wrong option is wrong, referencing the learner's documented error patterns
 - Wrong MC options must mirror: wurde/wuerde confusion, wrong case after two-way prepositions, dropped prepositions, wrong 3rd-person conjugation
 - Every exercise MUST include a "translation" field with the full English translation of the sentence (with the correct answer filled in)`;
@@ -144,7 +146,7 @@ Rules:
 - vocab: exactly 5 items, 1-2 kita:true. If the word is a VERB, include a "conjugation" object. For non-verbs, omit it.
 - sentences: exactly 3; sentences[0] must contain a deliberate error. Each sentence MUST have an "explanation" field.
 - ${targetExercises}
-- fill_in uses: { "type":"fill_in", "prompt":"...", "question":"...", "correct_answer":"...", "explanation":"...", "translation":"..." }
+- fill_in uses: { "type":"fill_in", "prompt":"...", "question":"...", "correct_answer":"...", "alt_answers":[], "explanation":"...", "translation":"..." }
 - Every explanation must explain why wrong answers are wrong, not just confirm the right one
 - Every exercise MUST include a "translation" field`;
 }

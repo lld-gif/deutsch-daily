@@ -378,17 +378,6 @@ function renderExercise(idx) {
   let html = typeBadge;
 
   if (ex.type === 'multiple_choice') {
-    // Shuffle options so the correct answer isn't always in the same position
-    if (!ex._shuffled) {
-      const indices = [0, 1, 2, 3];
-      for (let i = indices.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indices[i], indices[j]] = [indices[j], indices[i]];
-      }
-      ex.options = indices.map(i => ex.options[i]);
-      ex.answer = indices.indexOf(ex.answer);
-      ex._shuffled = true;
-    }
     html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
     <div class="exercise-items" id="mcItems">`;
     ['A','B','C','D'].forEach((l, i) => {
@@ -459,7 +448,8 @@ function submitText() {
   }).replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ').trim();
 
   const correct = ex.correct_answer || ex.correct_sentence || '';
-  const isCorrect = normalise(val) === normalise(correct);
+  const alts = ex.alt_answers || [];
+  const isCorrect = normalise(val) === normalise(correct) || alts.some(a => normalise(val) === normalise(a));
 
   input.className = isCorrect ? 'correct' : 'wrong';
   input.disabled = true;
