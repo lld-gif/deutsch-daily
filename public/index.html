@@ -251,7 +251,17 @@ async function callAPI(prompt) {
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const data = await res.json();
   const raw = data.content.map(b => b.text || '').join('');
-  return JSON.parse(raw.replace(/```json|```/g, '').trim());
+  const cleaned = raw.replace(/```json|```/g, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    // Likely truncated by max_tokens — check stop reason
+    const stop = data.stop_reason || '';
+    if (stop === 'max_tokens' || cleaned.length > 1000) {
+      throw new Error('Response was too long and got cut off. Try generating again.');
+    }
+    throw new Error(`Invalid JSON from API: ${e.message}`);
+  }
 }
 
 // ── Exercise state ──────────────────────────────────────────────────────────
