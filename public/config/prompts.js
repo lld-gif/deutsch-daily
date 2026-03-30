@@ -26,7 +26,9 @@ Exercise types — use ONLY these two (mix roughly 60/40):
 
 CRITICAL: Every exercise must have a rich explanation field that teaches — not just confirms the answer.
 CRITICAL: Every exercise must have a translation field with the full English translation.
-CRITICAL: Randomize which option (0-3) is the correct answer. Do NOT always put the correct answer at index 0 or 1. Distribute evenly across all four positions.`;
+CRITICAL: Randomize which option (0-3) is the correct answer. Do NOT always put the correct answer at index 0 or 1. Distribute evenly across all four positions.
+CRITICAL: All four multiple_choice options MUST have unique text. Never repeat the same option string twice.
+CRITICAL: fill_in correct_answer MUST use vocabulary or grammar forms introduced in THIS lesson's vocab or grammar sections. Do not test words the learner has not seen in the lesson.`;
 
 export function buildPrompt(topic, difficulty, todayHistory, { exerciseCount = 10, missedExercises = [], grammarHistory = [], sentenceThemes = [] } = {}) {
   const missedSection = missedExercises.length > 0

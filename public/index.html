@@ -415,7 +415,9 @@ function renderExercise(idx) {
 // Feature 2: translation shown in feedback. Feature 3: missed exercises saved.
 function submitMC(chosen, correct, explanation, translation) {
   const ex = currentLesson.exercises[exIndex];
-  const isCorrect = chosen === correct;
+  const chosenText = ex.options[chosen];
+  const correctText = ex.options[correct];
+  const isCorrect = chosen === correct || chosenText === correctText;
   exResults.push(isCorrect);
 
   // Feature 3: save missed exercise
