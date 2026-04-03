@@ -95,7 +95,8 @@ Rules:
 - CRITICAL: If a vocab word is a VERB, you MUST include a "conjugation" object with keys: ich, du, er/sie/es, wir, ihr, sie/Sie (present tense forms). This is required for EVERY verb in the vocab list. For non-verbs, OMIT the conjugation field entirely.
 - sentences: exactly 3, at least 1 usable with Walter. Each sentence MUST have an "explanation" field (1-2 sentences) explaining the grammar or usage pattern demonstrated.
 - ${targetExercises}
-- fill_in exercises use: { "type":"fill_in", "prompt":"...", "question":"sentence with ___", "correct_answer":"exact word(s)", "alt_answers":["other valid answer", ...], "explanation":"why correct + what a wrong answer looks like and why it fails", "translation":"English translation of the full sentence" }
+- fill_in exercises use: { "type":"fill_in", "prompt":"...", "question":"sentence with ___", "hint":"English meaning of the missing word(s), e.g. 'to supervise'", "correct_answer":"exact word(s)", "alt_answers":["other valid answer", ...], "explanation":"why correct + what a wrong answer looks like and why it fails", "translation":"English translation of the full sentence" }
+- CRITICAL fill_in constraint: The correct_answer MUST be one of the 5 vocab words from THIS lesson (or a conjugated/declined form of one). Never test a word the learner hasn't seen above in the vocab section. Build the sentence AROUND a vocab word, not the other way around.
 - fill_in alt_answers: include any other grammatically correct completions (e.g. if correct is "spielen können", include ["spielen will","spielen dürfen"] if those also work). Use an empty array [] if no alternatives exist.
 - multiple_choice explanation MUST explain why each wrong option is wrong, referencing the learner's documented error patterns
 - Wrong MC options must mirror: wurde/wuerde confusion, wrong case after two-way prepositions, dropped prepositions, wrong 3rd-person conjugation
@@ -148,7 +149,8 @@ Rules:
 - CRITICAL: If a vocab word is a VERB, you MUST include a "conjugation" object with keys: ich, du, er/sie/es, wir, ihr, sie/Sie (present tense forms). This is required for EVERY verb. For non-verbs, OMIT the conjugation field entirely.
 - sentences: exactly 3; sentences[0] must contain a deliberate error. Each sentence MUST have an "explanation" field.
 - ${targetExercises}
-- fill_in uses: { "type":"fill_in", "prompt":"...", "question":"...", "correct_answer":"...", "alt_answers":[], "explanation":"...", "translation":"..." }
+- fill_in uses: { "type":"fill_in", "prompt":"...", "question":"...", "hint":"English meaning of the missing word(s)", "correct_answer":"...", "alt_answers":[], "explanation":"...", "translation":"..." }
+- CRITICAL fill_in constraint: The correct_answer MUST be one of the 5 vocab words from THIS lesson (or a conjugated/declined form of one). Never test a word the learner hasn't seen above in the vocab section.
 - Every explanation must explain why wrong answers are wrong, not just confirm the right one
 - Every exercise MUST include a "translation" field`;
 }

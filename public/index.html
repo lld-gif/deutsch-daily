@@ -398,7 +398,8 @@ function renderExercise(idx) {
     html += `</div><div id="exFeedback"></div>`;
 
   } else if (ex.type === 'fill_in') {
-    html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
+    const hintHtml = ex.hint ? `<div style="margin-top:6px;font-size:0.9rem;color:var(--muted);font-style:italic">💡 ${ex.hint}</div>` : '';
+    html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong>${hintHtml}</div>
     <div class="text-input-wrap">
       <input type="text" id="textInput" placeholder="Type your answer…" onkeydown="if(event.key==='Enter')submitText()">
       <button class="primary" onclick="submitText()">Check</button>
