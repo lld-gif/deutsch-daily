@@ -523,7 +523,7 @@ function renderExercise(idx) {
   if (ex.type === 'multiple_choice') {
     html += `<div class="exercise-prompt">${ex.prompt}<br><strong>${ex.question}</strong></div>
     <div class="exercise-items" id="mcItems">`;
-    ['A','B','C','D'].forEach((l, i) => {
+    ['1','2','3','4'].forEach((l, i) => {
       html += `<div class="exercise-item" id="mc-${i}" onclick="submitMC(${i},${ex.answer},'${escJS(ex.explanation)}','${escJS(ex.translation || '')}')">
         <div class="option-letter">${l}</div><div>${ex.options[i]}</div>
       </div>`;
