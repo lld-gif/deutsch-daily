@@ -14,8 +14,21 @@ LEARNER PROFILE (from diagnostic):
   7. Noun capitalisation and gender.
 - STRENGTHS (scaffold on, don't re-drill): subordinate clause word order, Kita vocab, Perfekt tense.`;
 
-export const EXERCISE_TYPES = `
-Exercise types — use ONLY these two (mix roughly 60/40):
+const DICTATION_TYPE = `
+- "dictation": A German sentence the learner hears via text-to-speech and must type back from memory.
+  - sentence: the complete correct German sentence (will be spoken aloud).
+  - correct_answer: the exact same sentence (used for comparison).
+  - alt_answers: array of acceptable alternate spellings (may be empty []).
+  - explanation field: explain what grammar or vocabulary the sentence tests.
+  - translation field: English translation of the sentence.
+  - Use dictation to test spelling, case sensitivity (noun capitalisation), umlauts, and listening comprehension.`;
+
+export function buildExerciseTypes(hasGermanVoice = false) {
+  const dictSection = hasGermanVoice ? DICTATION_TYPE : '';
+  const mixNote = hasGermanVoice
+    ? 'Exercise types — use these four (mix roughly 45/25/20/10):'
+    : 'Exercise types — use these three (mix roughly 50/30/20):';
+  return `${mixNote}
 - "multiple_choice": A German sentence with ___ gap. Provide 4 options A-D. answer is index 0-3.
   - Wrong options MUST mirror the learner's documented error patterns (e.g. wurde vs wuerde, wrong case after two-way preposition, dropped preposition, wrong conjugation).
   - explanation field: always explain WHY each wrong option is wrong, not just why the right one is right.
@@ -23,6 +36,13 @@ Exercise types — use ONLY these two (mix roughly 60/40):
 - "fill_in": A German sentence with ___ gap. correct_answer is the exact word(s) expected. alt_answers is an array of other grammatically correct completions (may be empty).
   - explanation field: explain why this answer is correct AND what a learner might wrongly write instead and why that's wrong.
   - translation field: ALWAYS include an English translation of the complete sentence (with the correct answer filled in).
+- "sentence_builder": A correct German sentence scrambled into word tiles. The learner arranges them in correct order.
+  - Use this to test word order rules: V2 rule, subordinate clause verb-final, separable prefix positioning, adjective order.
+  - correct_sentence: the complete correct German sentence (with punctuation on the last word).
+  - scrambled: an array of ALL words from correct_sentence, randomly shuffled. Split on spaces. Punctuation stays attached to the word it belongs to (e.g. "Garten." not "Garten" + ".").
+  - CRITICAL: scrambled must contain EXACTLY the same words as correct_sentence split by spaces. No extra words, no missing words.
+  - explanation field: explain WHY this word order is correct (which rule applies).
+  - translation field: English translation of the sentence.${dictSection}
 
 CRITICAL: Every exercise must have a rich explanation field that teaches — not just confirms the answer.
 CRITICAL: Every exercise must have a translation field with the full English translation.
@@ -30,8 +50,9 @@ CRITICAL: Randomize which option (0-3) is the correct answer. Do NOT always put 
 CRITICAL: All four multiple_choice options MUST have unique text. Never repeat the same option string twice.
 CRITICAL: In multiple_choice explanations, refer to wrong options by their TEXT CONTENT (e.g. "'wurde' is wrong because…"), NEVER by letter (e.g. "Option D is wrong"). The option positions may vary.
 CRITICAL: fill_in correct_answer MUST use vocabulary or grammar forms introduced in THIS lesson's vocab or grammar sections. Do not test words the learner has not seen in the lesson.`;
+}
 
-export function buildPrompt(topic, difficulty, todayHistory, { exerciseCount = 10, missedExercises = [], grammarHistory = [], sentenceThemes = [] } = {}) {
+export function buildPrompt(topic, difficulty, todayHistory, { exerciseCount = 10, missedExercises = [], grammarHistory = [], sentenceThemes = [], weakGrammar = [], hasGermanVoice = false } = {}) {
   const missedSection = missedExercises.length > 0
     ? `\nPREVIOUSLY MISSED EXERCISES — recycle 1-2 of these (rephrase slightly, same grammar point):\n${missedExercises.map(m => `- Q: "${m.question}" → Correct: "${m.correct_answer}" (${m.type})`).join('\n')}\n`
     : '';
@@ -44,9 +65,13 @@ export function buildPrompt(topic, difficulty, todayHistory, { exerciseCount = 1
     ? `\nSENTENCE THEMES USED RECENTLY — vary from these:\n${sentenceThemes.join(', ')}\n`
     : '';
 
+  const weakSection = weakGrammar.length > 0
+    ? `\nADAPTIVE FOCUS — learner struggles with these (prioritize in cross-test exercises):\n${weakGrammar.map(g => `- ${g.title} (avg: ${g.avg}%)`).join('\n')}\n`
+    : '';
+
   const targetExercises = exerciseCount === 20
-    ? `exercises: exactly 20 items, mix of multiple_choice and fill_in ONLY. First 14 target today's grammar. Last 6 cross-test previous gaps.`
-    : `exercises: exactly 10 items, mix of multiple_choice and fill_in ONLY. First 7 target today's grammar. Last 3 cross-test previous gaps.`;
+    ? `exercises: exactly 20 items, mix of multiple_choice (~${hasGermanVoice ? 9 : 10}), fill_in (~${hasGermanVoice ? 5 : 6}), sentence_builder (~4)${hasGermanVoice ? ', and dictation (~2)' : ''}. First 14 target today's grammar. Last 6 cross-test previous gaps.`
+    : `exercises: exactly 10 items, mix of multiple_choice (~${hasGermanVoice ? 4 : 5}), fill_in (~${hasGermanVoice ? 2 : 3}), sentence_builder (~${hasGermanVoice ? 2 : 2})${hasGermanVoice ? ', and dictation (~1-2)' : ''}. First 7 target today's grammar. Last 3 cross-test previous gaps.`;
 
   const targetExerciseSlots = exerciseCount === 20
     ? `For exercises 1-14: target today's grammar point primarily.\nFor exercises 15-20: cross-test previous gaps from the priority list (rotate — no two lessons test the same gap in slots 15-20).`
@@ -58,8 +83,8 @@ Topic focus: ${TOPIC_MAP[topic] || TOPIC_MAP.auto}
 
 ALREADY USED TODAY — DO NOT REPEAT these grammar points or themes:
 ${(() => { const h = todayHistory; const parts = []; if (h.grammar.length) parts.push('Grammar points used: ' + h.grammar.join(', ')); if (h.themes.length) parts.push('Themes used: ' + h.themes.join(', ')); return parts.length ? parts.join('. ') + '. Choose something clearly different.' : 'Nothing used yet — choose freely.'; })()}
-${grammarSection}${missedSection}${sentenceSection}
-${EXERCISE_TYPES}
+${grammarSection}${missedSection}${sentenceSection}${weakSection}
+${buildExerciseTypes(hasGermanVoice)}
 ${targetExerciseSlots}
 
 Return ONLY valid JSON (no markdown, no preamble):
@@ -87,6 +112,14 @@ Return ONLY valid JSON (no markdown, no preamble):
       "answer": 2,
       "explanation": "why correct, name the error pattern avoided",
       "translation": "full English translation of the sentence with correct answer"
+    },
+    {
+      "type": "sentence_builder",
+      "prompt": "Put the words in the correct order (V2 rule)",
+      "correct_sentence": "Die Kinder spielen im Garten.",
+      "scrambled": ["Garten.", "spielen", "im", "Die", "Kinder"],
+      "explanation": "V2 rule: conjugated verb 'spielen' must be in second position",
+      "translation": "The children play in the garden."
     }
   ]
 }
@@ -100,17 +133,18 @@ Rules:
 - fill_in alt_answers: include any other grammatically correct completions (e.g. if correct is "spielen können", include ["spielen will","spielen dürfen"] if those also work). Use an empty array [] if no alternatives exist.
 - multiple_choice explanation MUST explain why each wrong option is wrong, referencing the learner's documented error patterns
 - Wrong MC options must mirror: wurde/wuerde confusion, wrong case after two-way prepositions, dropped prepositions, wrong 3rd-person conjugation
+- dictation exercises use: { "type":"dictation", "prompt":"Listen and type what you hear", "sentence":"complete German sentence", "correct_answer":"same sentence", "alt_answers":[], "explanation":"grammar/vocab note", "translation":"English translation" }
 - Every exercise MUST include a "translation" field with the full English translation of the sentence (with the correct answer filled in)`;
 }
 
-export function buildReviewPrompt(difficulty, { exerciseCount = 10 } = {}) {
+export function buildReviewPrompt(difficulty, { exerciseCount = 10, hasGermanVoice = false } = {}) {
   const targetExercises = exerciseCount === 20
-    ? `exercises: exactly 20, mix of multiple_choice and fill_in only, each targeting a different gap from the priority list (cycle through gaps twice)`
-    : `exercises: exactly 10, mix of multiple_choice and fill_in only, each targeting a different gap from the priority list`;
+    ? `exercises: exactly 20, mix of multiple_choice (~10), fill_in (~6), and sentence_builder (~4), each targeting a different gap from the priority list (cycle through gaps twice)`
+    : `exercises: exactly 10, mix of multiple_choice (~5), fill_in (~3), and sentence_builder (~2), each targeting a different gap from the priority list`;
 
   return `You are a German language tutor. Generate a 25-minute WEEKLY REVIEW for an adult learner at ${difficulty} targeting B1-B2.
 ${LEARNER_PROFILE}
-${EXERCISE_TYPES}
+${buildExerciseTypes(hasGermanVoice)}
 
 This is a review — no new grammar. Cross-test ALL priority gaps across the ${exerciseCount} exercises.
 
@@ -141,6 +175,14 @@ Return ONLY valid JSON (no markdown, no preamble):
       "answer": 2,
       "explanation": "...",
       "translation": "full English translation of the sentence with correct answer"
+    },
+    {
+      "type": "sentence_builder",
+      "prompt": "Put the words in the correct order",
+      "correct_sentence": "Er geht seit drei Monaten in die Kita.",
+      "scrambled": ["die", "Er", "Monaten", "Kita.", "seit", "geht", "drei", "in"],
+      "explanation": "seit + Praesens: German uses present tense with 'seit' where English uses present perfect",
+      "translation": "He has been going to Kita for three months."
     }
   ]
 }
@@ -150,7 +192,9 @@ Rules:
 - sentences: exactly 3; sentences[0] must contain a deliberate error. Each sentence MUST have an "explanation" field.
 - ${targetExercises}
 - fill_in uses: { "type":"fill_in", "prompt":"...", "question":"...", "hint":"English meaning of the missing word(s)", "correct_answer":"...", "alt_answers":[], "explanation":"...", "translation":"..." }
+- sentence_builder uses: { "type":"sentence_builder", "prompt":"...", "correct_sentence":"full correct sentence", "scrambled":["word","tiles","shuffled"], "explanation":"...", "translation":"..." }
 - CRITICAL fill_in constraint: The correct_answer MUST be one of the 5 vocab words from THIS lesson (or a conjugated/declined form of one). Never test a word the learner hasn't seen above in the vocab section.
+- CRITICAL sentence_builder constraint: scrambled array must contain EXACTLY the same words as correct_sentence.split(' '). Punctuation stays attached to the word.
 - Every explanation must explain why wrong answers are wrong, not just confirm the right one
 - Every exercise MUST include a "translation" field`;
 }
