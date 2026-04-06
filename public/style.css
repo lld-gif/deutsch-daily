@@ -133,3 +133,46 @@ button:disabled { opacity: 0.4; cursor: default; }
 .word-bank-item.wb-kita { border-left: 2px solid var(--kita); }
 .word-bank-empty { text-align: center; color: var(--muted); padding: 32px 16px; font-size: 0.9rem; }
 .word-bank-count { background: var(--accent); color: white; font-size: 0.65rem; font-weight: 700; border-radius: 10px; padding: 1px 6px; margin-left: 4px; }
+
+/* Stats modal */
+.stats-modal { max-width: 480px; }
+.stats-content { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.stats-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.stats-box { background: var(--surface2); border-radius: 10px; padding: 14px 10px; text-align: center; border: 1px solid var(--border); }
+.stats-number { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+.stats-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.stats-section { margin-bottom: 16px; }
+.stats-section-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.stats-grammar-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--surface2); border-radius: 6px; margin-bottom: 4px; font-size: 0.85rem; }
+.stats-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.stats-table th { text-align: left; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.stats-table td { padding: 8px; border-bottom: 1px solid var(--border); }
+
+/* Mistake review */
+.review-panel { padding: 8px 0; }
+.review-header { font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+.review-item { display: flex; gap: 12px; background: var(--surface2); border-radius: 10px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); }
+.review-number { width: 24px; height: 24px; border-radius: 50%; background: var(--red); color: #0f1117; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+.review-body { flex: 1; }
+.review-question { font-weight: 600; font-size: 0.92rem; margin-bottom: 8px; }
+.review-answers { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.review-wrong { font-size: 0.82rem; color: var(--red); }
+.review-correct { font-size: 0.82rem; color: var(--green); font-weight: 600; }
+.review-explanation { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+/* Review mistakes button */
+.review-mistakes-btn { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: var(--red); border-radius: 8px; padding: 10px 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-bottom: 12px; display: block; width: 100%; }
+.review-mistakes-btn:hover { background: rgba(248,113,113,0.2); }
+
+/* Retry button */
+.retry-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 18px; font-size: 0.85rem; cursor: pointer; margin-top: 10px; }
+.retry-btn:hover { border-color: var(--accent); }
+
+/* Mobile controls */
+@media(max-width: 520px) {
+  .controls { flex-direction: column; }
+  .controls select, .controls button { width: 100%; }
+  .spacer { display: none; }
+  .stats-summary { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .review-item { flex-direction: column; gap: 8px; }
+}
