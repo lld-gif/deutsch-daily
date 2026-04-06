@@ -372,6 +372,7 @@ let currentLesson = null;
 let exIndex = 0;
 let exResults = [];
 let awaitingAnswer = false;
+let lastSubmitTime = 0;
 
 // ── Keyboard shortcuts ──────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
@@ -380,6 +381,9 @@ document.addEventListener('keydown', e => {
     const overlay = document.querySelector('.word-bank-overlay');
     if (overlay) { overlay.remove(); return; }
   }
+
+  // Ignore keyboard shortcuts when typing in an input
+  if (document.activeElement?.tagName === 'INPUT') return;
 
   if (!currentLesson) return;
 
@@ -391,7 +395,8 @@ document.addEventListener('keydown', e => {
   }
 
   // Enter for Next Exercise / See Results button
-  if (e.key === 'Enter' && !awaitingAnswer) {
+  // Require 300ms after last submit to prevent instant auto-advance
+  if (e.key === 'Enter' && !awaitingAnswer && (Date.now() - lastSubmitTime > 300)) {
     const nextBtn = document.querySelector('.next-btn');
     if (nextBtn) { nextBtn.click(); return; }
   }
@@ -545,6 +550,7 @@ function renderExercise(idx) {
 function submitMC(chosen, correct, explanation, translation) {
   if (exResults.length > exIndex) return; // prevent double-submit
   awaitingAnswer = false;
+  lastSubmitTime = Date.now();
   const ex = currentLesson.exercises[exIndex];
   const chosenText = ex.options[chosen];
   const correctText = ex.options[correct];
@@ -597,6 +603,7 @@ function submitText() {
   input.className = isCorrect ? 'correct' : 'wrong';
   input.disabled = true;
   awaitingAnswer = false;
+  lastSubmitTime = Date.now();
   exResults.push({ correct: isCorrect, exercise: ex, userAnswer: val });
 
   // Feature 3: save missed exercise
@@ -703,7 +710,7 @@ function showMistakeReview() {
     </div>`;
 }
 
-function escJS(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
+function escJS(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n').replace(/\r/g,''); }
 
 // ── Generate ────────────────────────────────────────────────────────────────
 async function generateLesson() {
